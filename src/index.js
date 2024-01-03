@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 
 
-exports.cachefy = (fn, cache, keyFn) => {
+exports.fn = (fn, cache, keyFn) => {
   return async (...args) => {
     let key = keyFn(...args);
     let ret = cache.get(key);
@@ -13,6 +13,20 @@ exports.cachefy = (fn, cache, keyFn) => {
     return ret;
   }
 }
+
+exports.fnSync = (fn, cache, keyFn) => {
+  return (...args) => {
+    let key = keyFn(...args);
+    let ret = cache.get(key);
+    if(!ret) {
+      ret = fn(...args);
+      cache.put(key, ret);
+    }
+    return ret;
+  }
+}
+
+
 
 exports.ttl = function(ttl = 5 * 60, clone = true) {
 

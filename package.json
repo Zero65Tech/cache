@@ -18,6 +18,9 @@
     "test": "jest --coverage test",
     "lint": "npx eslint --fix src test"
   },
+  "dependencies": {
+    "lodash": "4.17.x"
+  },
   "devDependencies": {
     "eslint": "8.54.x",
     "jest": "29.7.x"

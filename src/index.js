@@ -1,4 +1,4 @@
-const Obj = require('./obj.js');
+const _ = require('lodash');
 
 
 
@@ -18,6 +18,7 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
 
   let map = {};
   ttl = Math.max(ttl, 60);
+  let timestamp = Date.now();
 
   this.get = (key) => {
 
@@ -31,7 +32,7 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
     let val = obj.value;
 
     if(clone && val !== null && typeof val == 'object')
-      return Obj.clone(val);
+      return _.cloneDeep(val);
 
     return val;
 
@@ -43,25 +44,26 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
       return;
 
     if(clone && val !== null && typeof val == 'object')
-      val = Obj.clone(val);
+      val = _.cloneDeep(val);
 
     map[key] = {
       value: val,
       expiry: Date.now() + Math.round(ttl * (1.05 - 0.1 * Math.random()) * 1000)
     };
 
+    if(timestamp + 60 * 1000 < Date.now()) {
+      timestamp = Date.now();
+      Object.entries(map).forEach(entry => {
+        if(entry[1].expiry < Date.now())
+          delete map[entry[0]];
+      });
+    }
+
   };
 
   this.delete = (key) => {
     delete map[key];
   };
-
-  setInterval(() => {
-    Object.entries(map).forEach(entry => {
-      if(entry[1].expiry < Date.now())
-        delete map[entry[0]];
-    });
-  }, 60 * 1000);
 
 }
 
@@ -78,7 +80,7 @@ exports.lru = function(size, clone = true) {
       return undefined;
 
     if(clone && val !== null && typeof val == 'object')
-      return Obj.clone(val);
+      return _.cloneDeep(val);
 
     return val;
 
@@ -90,7 +92,7 @@ exports.lru = function(size, clone = true) {
       return;
 
     if(clone && val !== null && typeof val == 'object')
-      val = Obj.clone(val);
+      val = _.cloneDeep(val);
     
     map[key] = val;
 

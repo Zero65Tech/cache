@@ -16,7 +16,7 @@ exports.cachefy = (fn, cache, keyFn) => {
 
 exports.ttl = function(ttl = 5 * 60, clone = true) {
 
-  let map = {};
+  const map = {};
   ttl = Math.max(ttl, 60);
   let timestamp = Date.now();
 
@@ -48,15 +48,14 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
 
     map[key] = {
       value: val,
-      expiry: Date.now() + Math.round(ttl * (1.05 - 0.1 * Math.random()) * 1000)
+      expiry: Date.now() + ttl * 1000
     };
 
     if(timestamp + 60 * 1000 < Date.now()) {
       timestamp = Date.now();
-      Object.entries(map).forEach(entry => {
-        if(entry[1].expiry < Date.now())
-          delete map[entry[0]];
-      });
+      for(let key in map)
+        if(map[key].expiry < Date.now())
+          delete map[key];
     }
 
   };
@@ -67,17 +66,20 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
 
 }
 
-exports.lru = function(size, clone = true) {
+exports.lru = function(size = 1024, clone = true) {
 
-  let queue = [];
   let map = {};
+  size = Math.max(size, 10);
 
   this.get = (key) => {
 
-    let val = map[key];
-
-    if(val === undefined)
+    let obj = map[key];
+    if(obj === undefined)
       return undefined;
+
+    obj.timestamp = Date.now();
+
+    let val = obj.value;
 
     if(clone && val !== null && typeof val == 'object')
       return _.cloneDeep(val);
@@ -93,20 +95,17 @@ exports.lru = function(size, clone = true) {
 
     if(clone && val !== null && typeof val == 'object')
       val = _.cloneDeep(val);
-    
-    map[key] = val;
 
-    let i = queue.indexOf(key);
-    if(i == -1) {
-      if(queue.length >= size) {
-        key = queue.pop();
-        delete map[key];
-      }
-    } else {
-      queue.splice(i, 1);
+    map[key] = {
+      value: val,
+      timestamp: Date.now()
+    };
+
+    let entries = Object.entries(map);
+    if(entries.length > size) {
+      let lruEntry = _.minBy(entries, entry => entry[1].timestamp);
+      delete map[lruEntry[0]];
     }
-
-    queue.unshift(key);
 
   };
 

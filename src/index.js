@@ -1,6 +1,9 @@
 const _ = require('lodash');
+const cache = ttl(); 
+const mockAsyncFn = jest.fn(async (x) => x * 2);
+const keyFn = (arg) => arg.toString(); 
 
-
+const cachedFn = fn(mockAsyncFn, cache, keyFn);
 
 exports.fn = (fn, cache, keyFn) => {
   return async (...args) => {

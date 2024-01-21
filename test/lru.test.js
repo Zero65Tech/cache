@@ -1,65 +1,55 @@
 const { lru } = require('../src/index.js');
 
 describe('LRU', () => {
-  
-  let cache;
-
-  beforeEach(() => {
-    cache = new lru();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers(); 
-  });
 
   test('get returns undefined for non-existent key', () => {
+    const cache = new lru();
     const result = cache.get('nonexistent');
     expect(result).toBeUndefined();
   });
 
   test('put and get work correctly', () => {
-    cache.put('key1', 'value1');
-    const result = cache.get('key1');
-    expect(result).toBe('value1');
+    const cache = new lru();
+    cache.put('key', 'value');
+    const result = cache.get('key');
+    expect(result).toBe('value');
   });
 
   test('put and get work correctly with object values', () => {
     const obj = { key: 'value' };
-    cache.put('key2', obj);
-    const result = cache.get('key2');
-    expect(result).toEqual(obj);
+    const cache = new lru();
+    cache.put('key', obj);
+    const result = cache.get('key');
     expect(result).not.toBe(obj);
+    expect(result).toEqual(obj);
   });
 
   test('put and get work correctly with object values and cloning disabled', () => {
     const obj = { key: 'value' };
-    cache = new lru(1024, false);
-    cache.put('key3', obj);
-    const result = cache.get('key3');
+    const cache = new lru(undefined, false);
+    cache.put('key', obj);
+    const result = cache.get('key');
     expect(result).toBe(obj);
+    expect(result).toEqual(obj);
   });
 
   test('put removes least recently used item when exceeding size', () => {
-    cache = new lru(2);
-    cache.put('key4', 'value4');
-    cache.put('key5', 'value5');
-    cache.put('key6', 'value6');
-    jest.advanceTimersByTime(1000);
-    const result = cache.get('key4');
-    expect(result).toBeUndefined();
+    const cache = new lru(2);
+    cache.put('key1', 'value1');
+    cache.put('key2', 'value2');
+    cache.put('key3', 'value3');
+    expect(cache.get('key1')).toBeUndefined();
   });
   
-
   test('put and get work correctly with timestamps updated', () => {
-    jest.useFakeTimers();
+    const cache = new lru();
     cache.put('key7', 'value7');
-    jest.advanceTimersByTime(2000);
     const resultBefore = cache.get('key7');
     expect(resultBefore).toBe('value7');
 
     cache.put('key7', 'newvalue7');
-    jest.advanceTimersByTime(1000);
     const resultAfter = cache.get('key7');
     expect(resultAfter).toBe('newvalue7');
   });
+
 });

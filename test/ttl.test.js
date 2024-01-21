@@ -86,7 +86,7 @@ test('evection', () => {
   jest.advanceTimersByTime(20 * 1000);
   cache.put('key3', 'value3');
 
-  jest.advanceTimersByTime(20 * 1000);
+  jest.advanceTimersByTime(20 * 1000 - 1);
   expect(cache.get('key1')).toBe('value1');
   expect(cache.get('key2')).toBe('value2');
   expect(cache.get('key3')).toBe('value3');

@@ -1,66 +1,111 @@
 const { ttl } = require('../src/index.js');
 
-describe('TTL', () => {
-  let cache;
 
-  beforeEach(() => {
-    cache = new ttl();
-  });
 
-  it('should retrieve a cached value', () => {
-    const key = 'testKey';
-    const value = 'testValue';
+test('.get() with non-existent key', () => {
+  const cache = new ttl();
+  const result = cache.get('nonexistent');
+  expect(result).toBeUndefined();
+});
 
-    cache.put(key, value);
+test('.put() with null value', () => {
+  const cache = new ttl();
+  cache.put('key', null);
+  const result = cache.get('key');
+  expect(result).toBeNull();
+});
 
-    const result = cache.get(key);
+test('.put() & .get()', () => {
+  const cache = new ttl();
+  cache.put('key', 'value');
+  const result = cache.get('key');
+  expect(result).toBe('value');
+});
 
-    expect(result).toBe(value);
-  });
+test('.put() & .get() with object values', () => {
+  const obj = { key: 'value' };
+  const cache = new ttl();
+  cache.put('key', obj);
+  const result = cache.get('key');
+  expect(result).not.toBe(obj);
+  expect(result).toEqual(obj);
+});
 
-  it('should not retrieve an expired value', async () => {
-    const key = 'testKey';
-    const value = 'testValue';
-    cache.put(key, value, 1);
-    jest.advanceTimersByTime(301 * 1000);
-    const result = cache.get(key);
-    expect(result).toBeUndefined();
-  });
+test('.put() & .get() with object values, clone == false', () => {
+  const obj = { key: 'value' };
+  const cache = new ttl(undefined, false);
+  cache.put('key', obj);
+  const result = cache.get('key');
+  expect(result).toBe(obj);
+  expect(result).toEqual(obj);
+});
 
-  it('should clone the value when retrieving if clone is set to true', () => {
-    const key = 'testKey';
-    const originalObject = { nested: { prop: 'value' } };
+test('.put(), with existing key', () => {
 
-    cache.put(key, originalObject);
+  const cache = new ttl();
+  cache.put('key', 'value');
 
-    const result = cache.get(key);
+  let result = cache.get('key');
+  expect(result).toBe('value');
 
-    expect(result).toEqual(originalObject);
-    expect(result).not.toBe(originalObject);
-  });
+  cache.put('key', 'new value');
 
-  it('should not clone the value when retrieving if clone is set to false', async () => {
-    const key = 'testKey';
-    const originalObject = { nested: { prop: 'value' } };
+  result = cache.get('key');
+  expect(result).toBe('new value');
 
-    const nonCloningCache = new ttl(60, false);
-    nonCloningCache.put(key, originalObject);
+});
 
-    const result = nonCloningCache.get(key);
+test('.delete()', () => {
 
-    expect(result).toBe(originalObject);
-  });
+  const cache = new ttl();
+  cache.put('key', 'value');
 
-  it('should delete a cached value', () => {
-    const key = 'testKey';
-    const value = 'testValue';
+  let result = cache.get('key');
+  expect(result).toBe('value');
 
-    cache.put(key, value);
+  cache.delete('key');
 
-    cache.delete(key);
+  result = cache.get('key');
+  expect(result).toBeUndefined();
 
-    const result = cache.get(key);
+});
 
-    expect(result).toBeUndefined();
-  });
+
+
+test('evection', () => {
+
+  jest.useFakeTimers();
+
+  const cache = new ttl(60);
+
+  cache.put('key1', 'value1');
+
+  jest.advanceTimersByTime(20 * 1000);
+  cache.put('key2', 'value2');
+
+  jest.advanceTimersByTime(20 * 1000);
+  cache.put('key3', 'value3');
+
+  jest.advanceTimersByTime(20 * 1000);
+  expect(cache.get('key1')).toBe('value1');
+  expect(cache.get('key2')).toBe('value2');
+  expect(cache.get('key3')).toBe('value3');
+
+  jest.advanceTimersByTime(20 * 1000);
+  expect(cache.get('key1')).toBeUndefined();
+  expect(cache.get('key2')).toBe('value2');
+  expect(cache.get('key3')).toBe('value3');
+
+  jest.advanceTimersByTime(20 * 1000);
+  expect(cache.get('key1')).toBeUndefined();
+  expect(cache.get('key2')).toBeUndefined();
+  expect(cache.get('key3')).toBe('value3');
+
+  jest.advanceTimersByTime(20 * 1000);
+  expect(cache.get('key1')).toBeUndefined();
+  expect(cache.get('key2')).toBeUndefined();
+  expect(cache.get('key3')).toBeUndefined();
+
+  jest.clearAllTimers();
+
 });

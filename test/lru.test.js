@@ -1,5 +1,7 @@
 const { lru } = require('../src/index.js');
 
+
+
 test('.get() with non-existent key', () => {
   const cache = new lru();
   const result = cache.get('nonexistent');
@@ -38,6 +40,38 @@ test('.put() & .get() with object values, clone == false', () => {
   expect(result).toEqual(obj);
 });
 
+test('.put(), with existing key', () => {
+
+  const cache = new lru();
+  cache.put('key', 'value');
+
+  let result = cache.get('key');
+  expect(result).toBe('value');
+
+  cache.put('key', 'new value');
+
+  result = cache.get('key');
+  expect(result).toBe('new value');
+
+});
+
+test('.delete()', () => {
+
+  const cache = new lru();
+  cache.put('key', 'value');
+
+  let result = cache.get('key');
+  expect(result).toBe('value');
+
+  cache.delete('key');
+
+  result = cache.get('key');
+  expect(result).toBeUndefined();
+
+});
+
+
+
 test('evection, without .get()', () => {
   const cache = new lru(2);
   cache.put('key1', 'value1');
@@ -66,35 +100,5 @@ test('evection, with .get()', () => {
   expect(cache.get('key3')).toBe('value3');
 
   jest.clearAllTimers();
-
-});
-
-test('.put(), with existing key', () => {
-
-  const cache = new lru();
-  cache.put('key', 'value');
-
-  let result = cache.get('key');
-  expect(result).toBe('value');
-
-  cache.put('key', 'new value');
-
-  result = cache.get('key');
-  expect(result).toBe('new value');
-
-});
-
-test('.delete()', () => {
-
-  const cache = new lru();
-  cache.put('key', 'value');
-
-  let result = cache.get('key');
-  expect(result).toBe('value');
-
-  cache.delete('key');
-
-  result = cache.get('key');
-  expect(result).toBeUndefined();
 
 });

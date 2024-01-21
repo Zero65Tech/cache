@@ -28,7 +28,7 @@ exports.fnSync = (fn, cache, keyFn) => {
 
 
 
-exports.ttl = function(ttl = 5 * 60, clone = true) {
+exports.ttl = function (ttl = 5 * 60, clone = true) {
 
   const map = {};
   ttl = Math.max(ttl, 60);
@@ -80,10 +80,10 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
 
 }
 
-exports.lru = function(size = 1024, clone = true) {
+exports.lru = function (size = 1024, clone = true) {
 
   let map = {};
-  size = Math.max(size, 10);
+  size = Math.max(size, 2);
 
   this.get = (key) => {
 
@@ -122,5 +122,9 @@ exports.lru = function(size = 1024, clone = true) {
     }
 
   };
+
+  this.dump = () => {
+    return _.cloneDeep(size);
+  }
 
 }

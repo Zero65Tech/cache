@@ -103,7 +103,7 @@ describe('Cache TTL', () => {
     expect(result).not.toBe(originalObject);
   });
 
-  it('should not clone the value when retrieving if clone is set to false', async() => {
+  it('should not clone the value when retrieving if clone is set to false', async () => {
     const key = 'testKey';
     const originalObject = { nested: { prop: 'value' } };
 

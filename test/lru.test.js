@@ -1,55 +1,100 @@
 const { lru } = require('../src/index.js');
 
-describe('LRU', () => {
+test('.get() with non-existent key', () => {
+  const cache = new lru();
+  const result = cache.get('nonexistent');
+  expect(result).toBeUndefined();
+});
 
-  test('get returns undefined for non-existent key', () => {
-    const cache = new lru();
-    const result = cache.get('nonexistent');
-    expect(result).toBeUndefined();
-  });
+test('.put() with null value', () => {
+  const cache = new lru();
+  cache.put('key', null);
+  const result = cache.get('key');
+  expect(result).toBeNull();
+});
 
-  test('put and get work correctly', () => {
-    const cache = new lru();
-    cache.put('key', 'value');
-    const result = cache.get('key');
-    expect(result).toBe('value');
-  });
+test('.put() & .get()', () => {
+  const cache = new lru();
+  cache.put('key', 'value');
+  const result = cache.get('key');
+  expect(result).toBe('value');
+});
 
-  test('put and get work correctly with object values', () => {
-    const obj = { key: 'value' };
-    const cache = new lru();
-    cache.put('key', obj);
-    const result = cache.get('key');
-    expect(result).not.toBe(obj);
-    expect(result).toEqual(obj);
-  });
+test('.put() & .get() with object values', () => {
+  const obj = { key: 'value' };
+  const cache = new lru();
+  cache.put('key', obj);
+  const result = cache.get('key');
+  expect(result).not.toBe(obj);
+  expect(result).toEqual(obj);
+});
 
-  test('put and get work correctly with object values and cloning disabled', () => {
-    const obj = { key: 'value' };
-    const cache = new lru(undefined, false);
-    cache.put('key', obj);
-    const result = cache.get('key');
-    expect(result).toBe(obj);
-    expect(result).toEqual(obj);
-  });
+test('.put() & .get() with object values, clone == false', () => {
+  const obj = { key: 'value' };
+  const cache = new lru(undefined, false);
+  cache.put('key', obj);
+  const result = cache.get('key');
+  expect(result).toBe(obj);
+  expect(result).toEqual(obj);
+});
 
-  test('put removes least recently used item when exceeding size', () => {
-    const cache = new lru(2);
-    cache.put('key1', 'value1');
-    cache.put('key2', 'value2');
-    cache.put('key3', 'value3');
-    expect(cache.get('key1')).toBeUndefined();
-  });
-  
-  test('put and get work correctly with timestamps updated', () => {
-    const cache = new lru();
-    cache.put('key7', 'value7');
-    const resultBefore = cache.get('key7');
-    expect(resultBefore).toBe('value7');
+test('evection, without .get()', () => {
+  const cache = new lru(2);
+  cache.put('key1', 'value1');
+  cache.put('key2', 'value2');
+  cache.put('key3', 'value3');
+  expect(cache.get('key1')).toBeUndefined();
+  expect(cache.get('key2')).toBe('value2');
+  expect(cache.get('key3')).toBe('value3');
+});
 
-    cache.put('key7', 'newvalue7');
-    const resultAfter = cache.get('key7');
-    expect(resultAfter).toBe('newvalue7');
-  });
+test('evection, with .get()', () => {
+
+  jest.useFakeTimers();
+
+  const cache = new lru(2);
+  cache.put('key1', 'value1');
+  cache.put('key2', 'value2');
+
+  jest.advanceTimersByTime(1);
+  expect(cache.get('key1')).toBe('value1');
+
+  cache.put('key3', 'value3');
+
+  expect(cache.get('key1')).toBe('value1');
+  expect(cache.get('key2')).toBeUndefined();
+  expect(cache.get('key3')).toBe('value3');
+
+  jest.clearAllTimers();
+
+});
+
+test('.put(), with existing key', () => {
+
+  const cache = new lru();
+  cache.put('key', 'value');
+
+  let result = cache.get('key');
+  expect(result).toBe('value');
+
+  cache.put('key', 'new value');
+
+  result = cache.get('key');
+  expect(result).toBe('new value');
+
+});
+
+test('.delete()', () => {
+
+  const cache = new lru();
+  cache.put('key', 'value');
+
+  let result = cache.get('key');
+  expect(result).toBe('value');
+
+  cache.delete('key');
+
+  result = cache.get('key');
+  expect(result).toBeUndefined();
 
 });

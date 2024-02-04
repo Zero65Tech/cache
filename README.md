@@ -5,7 +5,7 @@ This repository provides a set of utility functions for implementing caching mec
 ## Installation
 
 ```bash
-npm install
+npm install @zero65tech/cache
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ npm install
 The TTL cache implements a simple key-value store with a time-to-live mechanism. The stored values are automatically evicted after a specified duration.
 
 ```javascript
-const { ttl } = require('cache-utils');
+const { ttl } = require('@zero65tech/cache');
 
 const cache = new ttl(60); // Set TTL to 60 seconds
 
@@ -29,7 +29,7 @@ console.log(result); // Output: 'value'
 The LRU cache implements a least recently used algorithm to evict the least recently accessed items when the cache size exceeds a specified limit.
 
 ```javascript
-const { lru } = require('cache-utils');
+const { lru } = require('@zero65tech/cache');
 
 const cache = new lru(2); // Set cache size to 2
 
@@ -49,7 +49,7 @@ The repository also provides utility functions for caching the results of asynch
 #### Asynchronous Function Caching
 
 ```javascript
-const { fn, ttl } = require('cache-utils');
+const { fn, ttl } = require('@zero65tech/cache');
 const cache = new ttl();
 
 const asyncFunction = async (param) => {
@@ -65,7 +65,7 @@ const result = await cachedAsyncFunction('someParam');
 #### Synchronous Function Caching
 
 ```javascript
-const { fnSync, lru } = require('cache-utils');
+const { fnSync, lru } = require('@zero65tech/cache');
 const cache = new lru();
 
 const syncFunction = (param) => {
@@ -78,10 +78,4 @@ const cachedSyncFunction = fnSync(syncFunction, cache, (param) => param);
 const result = cachedSyncFunction('someParam');
 ```
 
-## Tests
 
-The repository includes Jest test cases to ensure the correctness and functionality of the provided cache utilities. You can run the tests using the following command:
-
-```bash
-npm test
-```

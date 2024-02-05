@@ -1,4 +1,4 @@
-const { fn, fnSync } = require('../src/index');
+const { fn } = require('../src/index');
 
 
 

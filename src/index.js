@@ -40,7 +40,7 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
     if(obj === undefined)
       return undefined;
 
-    if(obj.expiry < Date.now())
+    if(obj.expiry <= Date.now())
       return undefined;
 
     let val = obj.value;
@@ -68,7 +68,7 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
     if(timestamp + 60 * 1000 < Date.now()) {
       timestamp = Date.now();
       for(let key in map)
-        if(map[key].expiry < Date.now())
+        if(map[key].expiry <= Date.now())
           delete map[key];
     }
 
@@ -83,7 +83,7 @@ exports.ttl = function(ttl = 5 * 60, clone = true) {
 exports.lru = function(size = 1024, clone = true) {
 
   let map = {};
-  size = Math.max(size, 10);
+  size = Math.max(size, 2);
 
   this.get = (key) => {
 
@@ -121,6 +121,10 @@ exports.lru = function(size = 1024, clone = true) {
       delete map[lruEntry[0]];
     }
 
+  };
+
+  this.delete = (key) => {
+    delete map[key];
   };
 
 }
